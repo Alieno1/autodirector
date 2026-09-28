@@ -25,7 +25,7 @@ light_mode = st.sidebar.toggle("☀️ Light Mode")
 # Inject vibrant animated CSS
 if light_mode:
     bg_style = """
-    .stApp, [data-testid="stSidebar"] {
+    .stApp, [data-testid="stSidebar"], header[data-testid="stHeader"] {
         background: linear-gradient(-45deg, #f0f4f8, #e8f0fe, #d2e3fc, #f0f4f8) !important;
         background-size: 400% 400%;
         animation: gradientBG 15s ease infinite;
