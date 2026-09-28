@@ -48,12 +48,16 @@ if light_mode:
         opacity: 1 !important;
     }
     
-    /* Force ALL Header and Sidebar SVGs to Pitch Black */
-    header svg, [data-testid="stSidebar"] svg, [data-testid="collapsedControl"] svg, [data-testid="stToolbar"] svg {
-        filter: none !important;
-        fill: #000000 !important;
-        stroke: #000000 !important;
+    /* Force ALL Header and Sidebar Icons to Pitch Black */
+    header span, [data-testid="stSidebar"] span[data-testid="stIconMaterial"], [data-testid="stToolbar"] span {
         color: #000000 !important;
+        opacity: 1 !important;
+    }
+    
+    /* Ensure the Open Sidebar Menu button is perfectly blackened */
+    [data-testid="collapsedControl"] span {
+        color: #000000 !important;
+        opacity: 1 !important;
     }
     
     /* Ensure the container doesn't block visibility */
