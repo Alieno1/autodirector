@@ -35,12 +35,11 @@ if light_mode:
         text-shadow: none !important;
     }
     /* Light Mode Form Elements */
-    /* Universal Form Recolor for Light Mode */
+    /* Universal Form Recolor for Light Mode (Hyper-redundant) */
+    .stTextInput > div > div, .stTextArea > div > div, .stSelectbox > div > div,
     [data-baseweb="input"], [data-baseweb="textarea"], [data-baseweb="select"],
-    [data-baseweb="input"] input, [data-baseweb="textarea"] textarea {
+    input, textarea, .stSelectbox [role="combobox"], [data-baseweb="input"] input, [data-baseweb="textarea"] textarea {
         background-color: #ffffff !important;
-    }
-    input, textarea, .stSelectbox [role="combobox"] {
         color: #000000 !important;
         -webkit-text-fill-color: #000000 !important;
     }
@@ -48,14 +47,19 @@ if light_mode:
         color: #555555 !important;
         opacity: 1 !important;
     }
+    
     /* Force ANY SVG inside any Button to Pitch Black (Catches sidebar arrow and options menu) */
-    button svg, [data-testid="collapsedControl"] svg {
+    button svg, [data-testid="collapsedControl"] svg, [data-testid="stHeader"] button svg, [data-testid="stSidebar"] button svg {
         filter: brightness(0) !important;
+        fill: #000000 !important;
+        color: #000000 !important;
     }
-    /* Force Toggle Switch color */
-    [data-testid="stWidgetLabel"] + div > div[data-baseweb="checkbox"] > div {
+    
+    /* Force Toggle Switch */
+    div[role="switch"] > div, .stCheckbox [role="switch"] > div {
         background-color: #000000 !important;
     }
+    
     /* Glowing Buttons Light Mode (Bright Cyan/Blue) */
     div.stButton > button {
         background: linear-gradient(90deg, #4fc3f7, #29b6f6) !important;
