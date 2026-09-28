@@ -49,12 +49,11 @@ if light_mode:
         opacity: 1 !important;
     }
     /* Force ANY SVG inside any Button to Pitch Black (Catches sidebar arrow and options menu) */
-    button svg {
-        fill: #000000 !important;
-        color: #000000 !important;
+    button svg, [data-testid="collapsedControl"] svg {
+        filter: brightness(0) !important;
     }
-    /* Force Toggle Switch */
-    div[role="switch"] > div {
+    /* Force Toggle Switch color */
+    [data-testid="stWidgetLabel"] + div > div[data-baseweb="checkbox"] > div {
         background-color: #000000 !important;
     }
     /* Glowing Buttons Light Mode (Bright Cyan/Blue) */
