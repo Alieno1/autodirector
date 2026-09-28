@@ -1,18 +1,19 @@
 # 🎬 Auto-Director: Agentic Workflow for AI Micro-Drama Generation
 
-**Auto-Director** is a production-grade, multi-agent AI pipeline designed to convert raw text stories (in English or Hindi) into fully animated, voice-narrated, subtitle-aligned 9:16 vertical micro-dramas (YouTube Shorts, Instagram Reels, TikTok).
+**Auto-Director** is a production-grade, multi-agent AI pipeline designed to convert raw text stories (in English or Hindi) into fully animated, voice-narrated, subtitle-aligned 9:16 vertical micro-dramas (YouTube Shorts, Instagram Reels, TikTok) dynamically through a beautiful Streamlit UI.
 
 ---
 
 ## 🌟 Key Features
 
+- 🖥️ **Vibrant Streamlit UI:** A fully animated, dark cyberpunk-themed web interface for entering scripts, analyzing lengths, and watching generated video output directly in your browser.
+- ⏱️ **Intelligent 90s Optimization:** Built-in OpenRouter processors analyze text length. If a story goes over the ~130-word limit (90 seconds), it automatically generates condensed alternative plots on the fly for the user to choose from.
 - 🤖 **5-Agent Autonomous Pipeline:** Modular, provider-agnostic agents handling scriptwriting, voice narration, visual generation, subtitle alignment, and final video assembly.
-- 🌐 **Multilingual Support:** Dynamic font resolution supporting Latin (English) and Devanagari (Hindi) scripts without character box ("tofu") artifacts.
+- 🎥 **True AI Text-to-Video:** Replaced static images with cinematic 5-second video clips rendered fully through **Replicate (MiniMax video-01)**.
 - ⚡ **Multi-Tier Fallback Resilience:**
   - **Voice:** ElevenLabs → gTTS → `espeak-ng`
-  - **Visuals:** Gemini Flash 3.1 → Pollinations Turbo → Stock Photos → PIL Gradient Cards
-- 🎥 **Kinetic Motion & Captions:** Ken Burns pan/zoom effects, custom subtitle word wrapping, and rounded contrast pill overlays.
-- ⚙️ **Optimized FFmpeg Muxing:** Strips unneeded alpha masks (`final.mask = None`) to guarantee 100% reliable, fast H.264 MP4 container encoding.
+  - **Visuals:** Replicate (MiniMax video) → Pollinations Turbo (AI Image) → Stock Photos → PIL Gradient Cards
+- 🌐 **Multilingual Support:** Dynamic font resolution supporting Latin (English) and Devanagari (Hindi) scripts natively without character box ("tofu") artifacts. The LLM auto-translates cinematic prompts to English while preserving narration.
 
 ---
 
@@ -20,12 +21,12 @@
 
 ```
                        ┌─────────────────────────┐
-                       │     Raw Story Input     │
+                       │     Streamlit Web UI    │
                        └────────────┬────────────┘
-                                    │
+                                    │ (Story text < 130 words)
                                     ▼
 ┌─────────────────────────────────────────────────────────────────────────┐
-│ [1] ScriptwriterAgent (Gemini 2.5 Flash / Offline Rule Splitter)       │
+│ [1] ScriptwriterAgent (OpenRouter / meta-llama/llama-3.1-8b-instruct)   │
 │     • Parses story into structured scenes (narration, visual prompt, mood)│
 └───────────────────────────────────┬─────────────────────────────────────┘
                                     │
@@ -37,8 +38,8 @@
                                     │
                                     ▼
 ┌─────────────────────────────────────────────────────────────────────────┐
-│ [3] VisualAgent (Gemini 3.1 ➔ Pollinations Turbo ➔ Stock Photos ➔ PIL) │
-│     • Generates 9:16 vertical scene imagery with intelligent caching    │
+│ [3] VideoAgent (Replicate Minimax ➔ Pollinations Turbo ➔ Stock Photos)  │
+│     • Generates stunning 9:16 vertical video clips or fallback static images│
 └───────────────────────────────────┬─────────────────────────────────────┘
                                     │
                                     ▼
@@ -49,8 +50,9 @@
                                     │
                                     ▼
 ┌─────────────────────────────────────────────────────────────────────────┐
-│ [5] DirectorAgent (MoviePy + Native PIL Engine + FFmpeg H.264)         │
-│     • Renders Ken Burns pan/zoom, burned-in subtitles, audio-video sync│
+│ [5] DirectorAgent (MoviePy 2.x + Native PIL Engine + FFmpeg H.264)      │
+│     • Assembles video loops, applies Ken Burns to still fail-backs,     │
+│       burns in subtitles, and syncs massive audio-video files safely.   │
 └───────────────────────────────────┬─────────────────────────────────────┘
                                     │
                                     ▼
@@ -83,37 +85,31 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
+### 3. API Key Configuration
+
+Copy the example environment file or manually create a `.env` in the root folder with the following:
+
+```env
+OPENROUTER_API_KEY="sk-or-your-key..."
+REPLICATE_API_TOKEN="r8_your_token..."
+
+# Optional:
+ELEVENLABS_API_KEY="sk_your_key_here..."
+```
+
 ---
 
-## 💻 Running the Pipeline
+## 💻 Running the Application
 
-### Demo Mode (Offline & Zero API Cost)
-Runs immediately using offline TTS (`espeak-ng`/`gTTS`) and PIL image cards:
-
-```bash
-python3 main.py sample_input/my_story_english.txt -o demo_story.mp4
-```
-
-### Live Mode (Full AI Fidelity)
-Set your API keys (or save them in a `.env` file) to enable real ElevenLabs voice narration and Gemini AI image generation:
+Forget the CLI—everything is gracefully handled via the **Streamlit Web UI**.
 
 ```bash
-export GEMINI_API_KEY="your_gemini_key"
-export ELEVENLABS_API_KEY="your_elevenlabs_key"
-
-python3 main.py sample_input/my_story_english.txt -o live_story.mp4
+./.venv/bin/streamlit run app.py
 ```
-
-### CLI Command Options
-
-```bash
-python3 main.py [STORY_FILE] [OPTIONS]
-
-Options:
-  -o, --output TEXT     Filename for the final MP4 (saved to output/ directory).
-  -v, --verbose         Enable DEBUG-level logging.
-  --help                Show usage information.
-```
+This boots up a local web server at `localhost:8501`. 
+1. The UI will securely auto-load your `.env` keys.
+2. Enter a story in English, Hindi, or Hinglish.
+3. Click "Generate Video", let the 5-Agent pipeline run, and view the final MP4 embedded directly the browser!
 
 ---
 
@@ -121,39 +117,28 @@ Options:
 
 ```
 autodirector/
-├── main.py                   # Orchestration CLI & Progress Tracker
+├── app.py                    # The Main Streamlit UI 
 ├── config.py                 # Pipeline configuration & API key management
 ├── models.py                 # Pydantic data models (Scene, Caption, etc.)
 ├── agents/
-│   ├── scriptwriter_agent.py # Story parsing & scene breakdown
+│   ├── scriptwriter_agent.py # OpenRouter Story parsing & scene breakdown
 │   ├── voice_agent.py        # Voice synthesis (ElevenLabs / gTTS / espeak)
-│   ├── visual_agent.py       # Image generation (Gemini / Pollinations / Stock)
+│   ├── visual_agent.py       # Cinematic Video Generation (Replicate / Fallbacks)
 │   ├── subtitle_agent.py     # Subtitle word timing alignment
-│   └── director_agent.py     # MoviePy animation, PIL caption overlay & video assembly
+│   └── director_agent.py     # MoviePy 2.x video assembly & styling
+├── .streamlit/
+│   └── config.toml           # Vibrant Animated cyberpunk Streamlit styling
 ├── core/
-│   ├── logger.py             # Rich logger configuration
+│   ├── logger.py             # UI + Terminal logging handlers
 │   ├── retry.py              # Exponential backoff & HTTP status filter
 │   └── exceptions.py         # Custom pipeline exceptions
 ├── assets/                   # TrueType fonts (DejaVuSans-Bold, NotoSansDevanagari)
-├── sample_input/             # Sample story files (my_story_english.txt, my_story_hindi.txt)
-├── output/                   # Rendered MP4 output directory
-└── tests/                    # Comprehensive unit & integration tests
+├── output/                   # Final rendered MP4 output directory
+└── temp/                     # Internal sandbox for holding AI clips
 ```
-
----
-
-## 🧪 Testing & Verification
-
-Run the automated unit test suite with `pytest`:
-
-```bash
-python3 -m pytest
-```
-
----
 
 ## 🛡️ Architecture Design Decisions
 
-1. **Audio-Driven Timing:** Video duration and subtitle timings are derived from actual synthesized waveform durations (`AudioFileClip.duration`), ensuring 100% audio-visual synchronization.
-2. **Provider-Agnostic Resilience:** Every agent encapsulates provider logic. If a primary service fails (e.g. ElevenLabs rate limits), it seamlessly falls back down the chain without crashing the run.
-3. **High-Performance Subtitle Engine:** Uses Pillow native `stroke_width` and `stroke_fill` attributes for crisp 49x faster text outline rendering.
+1. **MoviePy 2.x Refactor:** Handled the major API breaks in MoviePy 2.2 (`moviepy.video.fx.all` deprecated to `.with_effects([vfx.Loop()])`) for stable video integration.
+2. **Dynamic UI Streaming:** Bypassed standard un-copyable UI text blocks and used `st.code()` with custom python-logging wrappers so users can comfortably monitor and copy pipeline errors as it runs.
+3. **Provider-Agnostic Resilience:** If Replicate limits are exhausted, the app silently routes to fetch AI Images from Pollinations. The Director Agent naturally detects MP4 versus PNG to apply Pan-and-Zoom effects appropriately without crashing.
