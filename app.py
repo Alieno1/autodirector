@@ -35,10 +35,24 @@ if light_mode:
         text-shadow: none !important;
     }
     /* Light Mode Form Elements */
-    .stTextInput>div>div>input, .stTextArea>div>div>textarea, .stSelectbox>div>div>div {
+    div[data-baseweb="input"], div[data-baseweb="textarea"], div[data-baseweb="select"] {
         background-color: #ffffff !important;
+        border: 1px solid #c0c0c0 !important;
+    }
+    div[data-baseweb="input"] input, div[data-baseweb="textarea"] textarea {
+        background-color: transparent !important;
         color: #1a1a1a !important;
-        border: 1px solid #ccc !important;
+        -webkit-text-fill-color: #1a1a1a !important;
+    }
+    ::placeholder {
+        color: #666 !important;
+        opacity: 1 !important;
+    }
+    div[data-baseweb="input"] svg {
+        fill: #1a1a1a !important;
+    }
+    div[data-baseweb="select"] div {
+        color: #1a1a1a !important;
     }
     /* Glowing Buttons Light Mode (Bright Cyan/Blue) */
     div.stButton > button {
