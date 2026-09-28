@@ -10,9 +10,7 @@
 - ⏱️ **Intelligent 90s Optimization:** Built-in OpenRouter processors analyze text length. If a story goes over the ~130-word limit (90 seconds), it automatically generates condensed alternative plots on the fly for the user to choose from.
 - 🤖 **5-Agent Autonomous Pipeline:** Modular, provider-agnostic agents handling scriptwriting, voice narration, visual generation, subtitle alignment, and final video assembly.
 - 🎥 **True AI Text-to-Video:** Replaced static images with cinematic 5-second video clips rendered fully through **Replicate (MiniMax video-01)**.
-- ⚡ **Multi-Tier Fallback Resilience:**
-  - **Voice:** ElevenLabs → gTTS → `espeak-ng`
-  - **Visuals:** Replicate (MiniMax video) → Pollinations Turbo (AI Image) → Stock Photos → PIL Gradient Cards
+- ⚡ **Multi-Tier Fallback Resilience:** The software is built with robust safety nets. If an API runs out of free credits, the program refuses to crash and silently falls back to lower-tier free engines (like Pollinations for images or gTTS/espeak for offline voice synthesis) to guarantee your movie finishes rendering.
 - 🌐 **Multilingual Support:** Dynamic font resolution supporting Latin (English) and Devanagari (Hindi) scripts natively without character box ("tofu") artifacts. The LLM auto-translates cinematic prompts to English while preserving narration.
 
 ---
@@ -25,13 +23,20 @@ To use Auto-Director at its full potential, you must configure two specific API 
    * Get it here: [openrouter.ai](https://openrouter.ai/)
 2. **Replicate (The Video Camera):** Provides access to massive cloud supercomputers running the *MiniMax* Video AI to generate your animated video clips. 
    * Get it here: [replicate.com/account/api-tokens](https://replicate.com/account/api-tokens)
-   * *(Note: Replicate is a paid service costing roughly $0.02 per clip. You MUST add a payment method to your Replicate account, or the app will hit a 'Free Limit' error and fall back to static images).*
+   * *(Note: Replicate is a paid service costing roughly $0.02 per clip. You MUST add a payment method to your Replicate account, or the app will hit a 'Free Limit' error).*
+
+### 🛡️ The Fallback Safety Mechanism (What happens if I don't pay?)
+If your Replicate API key runs out of free credits or hits a rate limit, **the application will not crash!** 
+Instead, the Visual Agent will intelligently detect the error and instantly fall back to generating high-quality **cinematic static images** via Pollinations AI (which is completely free). Our built-in MoviePy Director Agent will then dynamically detect that it received a still image instead of an MP4 and will automatically apply a cinematic "Ken Burns" panning and zooming effect so your final movie remains dynamic, animated, and fully finished! 
 
 ### Adding the Keys to the Software:
 Create a `.env` file in the root folder of this project and paste your keys:
 ```env
 OPENROUTER_API_KEY="sk-or-v1-your-key-here..."
 REPLICATE_API_TOKEN="r8_your_token_here..."
+
+# Optional:
+ELEVENLABS_API_KEY="sk_your_key_here..."
 ```
 Because this file is in `.gitignore`, **your keys will never be uploaded to GitHub.** Alternatively, you can copy/paste your keys directly into the Streamlit Web UI sidebar!
 
