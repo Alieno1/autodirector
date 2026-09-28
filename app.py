@@ -35,35 +35,26 @@ if light_mode:
         text-shadow: none !important;
     }
     /* Light Mode Form Elements */
-    div[data-baseweb="input"], div[data-baseweb="textarea"], div[data-baseweb="select"] {
+    /* Universal Form Recolor for Light Mode */
+    [data-baseweb="input"], [data-baseweb="textarea"], [data-baseweb="select"],
+    [data-baseweb="input"] input, [data-baseweb="textarea"] textarea {
         background-color: #ffffff !important;
-        border: 1px solid #c0c0c0 !important;
     }
-    div[data-baseweb="input"] input, div[data-baseweb="textarea"] textarea {
-        background-color: transparent !important;
-        color: #1a1a1a !important;
-        -webkit-text-fill-color: #1a1a1a !important;
+    input, textarea, .stSelectbox [role="combobox"] {
+        color: #000000 !important;
+        -webkit-text-fill-color: #000000 !important;
     }
     ::placeholder {
-        color: #666 !important;
+        color: #555555 !important;
         opacity: 1 !important;
     }
-    div[data-baseweb="input"] svg {
-        fill: #1a1a1a !important;
-    }
-    div[data-baseweb="select"] div {
-        color: #1a1a1a !important;
-    }
-    /* Fix Sidebar Collapse Arrow and Top Right Menu (Deploy / Options) */
-    [data-testid="stSidebar"] button svg, [data-testid="stHeader"] button svg, [data-testid="collapsedControl"] svg {
+    /* Force ANY SVG inside any Button to Pitch Black (Catches sidebar arrow and options menu) */
+    button svg {
         fill: #000000 !important;
         color: #000000 !important;
     }
-    [data-testid="stHeader"] span, [data-testid="stHeader"] button {
-        color: #000000 !important;
-    }
-    /* Fix Toggle Switch Color for Light Mode */
-    .stCheckbox > label[data-baseweb="checkbox"] > div:first-child {
+    /* Force Toggle Switch */
+    div[role="switch"] > div {
         background-color: #000000 !important;
     }
     /* Glowing Buttons Light Mode (Bright Cyan/Blue) */
