@@ -49,19 +49,26 @@ if light_mode:
     }
     
     /* Force ALL Header and Sidebar Icons to Pitch Black */
-    header span, [data-testid="stSidebar"] span[data-testid="stIconMaterial"], [data-testid="stToolbar"] span {
+    header span, [data-testid="stSidebar"] span[data-testid="stIconMaterial"], [data-testid="stToolbar"] span, [data-testid="stToolbarActionButtonIcon"] {
         color: #000000 !important;
         opacity: 1 !important;
+        filter: brightness(0) !important;
+    }
+    
+    /* Ensure the entire Toolbar block text is black */
+    [data-testid="stToolbar"] {
+        filter: brightness(0) !important;
     }
     
     /* Ensure the Open Sidebar Menu button is perfectly blackened */
     [data-testid="collapsedControl"] span {
         color: #000000 !important;
         opacity: 1 !important;
+        filter: brightness(0) !important;
     }
     
     /* Ensure the container doesn't block visibility */
-    [data-testid="collapsedControl"], header, [data-testid="stToolbar"] {
+    [data-testid="collapsedControl"], header {
         color: #000000 !important;
         opacity: 1 !important;
     }
