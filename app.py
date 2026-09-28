@@ -25,25 +25,55 @@ light_mode = st.sidebar.toggle("☀️ Light Mode")
 # Inject vibrant animated CSS
 if light_mode:
     bg_style = """
-    .stApp {
-        background: linear-gradient(-45deg, #f0f4f8, #e8f0fe, #d2e3fc, #f0f4f8);
+    .stApp, [data-testid="stSidebar"] {
+        background: linear-gradient(-45deg, #f0f4f8, #e8f0fe, #d2e3fc, #f0f4f8) !important;
         background-size: 400% 400%;
         animation: gradientBG 15s ease infinite;
     }
-    h1, h2, h3, h4, p, label {
+    h1, h2, h3, h4, h5, h6, p, label, .stMarkdown, .stText, [data-testid="stMarkdownContainer"] p {
         color: #1a1a1a !important;
         text-shadow: none !important;
+    }
+    /* Light Mode Form Elements */
+    .stTextInput>div>div>input, .stTextArea>div>div>textarea, .stSelectbox>div>div>div {
+        background-color: #ffffff !important;
+        color: #1a1a1a !important;
+        border: 1px solid #ccc !important;
+    }
+    /* Glowing Buttons Light Mode (Bright Cyan/Blue) */
+    div.stButton > button {
+        background: linear-gradient(90deg, #4fc3f7, #29b6f6) !important;
+        color: white !important;
+        border: none !important;
+        box-shadow: 0 4px 15px rgba(41, 182, 246, 0.4);
+        transition: all 0.3s ease 0s;
+    }
+    div.stButton > button:hover {
+        box-shadow: 0 4px 25px rgba(41, 182, 246, 0.7);
+        transform: translateY(-2px);
     }
     """
 else:
     bg_style = """
-    .stApp {
-        background: linear-gradient(-45deg, #120a1f, #1c1130, #2c0b38, #0e0524);
+    .stApp, [data-testid="stSidebar"] {
+        background: linear-gradient(-45deg, #120a1f, #1c1130, #2c0b38, #0e0524) !important;
         background-size: 400% 400%;
         animation: gradientBG 15s ease infinite;
     }
     h1, h2, h3 {
         text-shadow: 0 2px 10px rgba(255, 0, 127, 0.3);
+    }
+    /* Glowing Buttons Dark Mode (Neon Purple/Pink) */
+    div.stButton > button {
+        background: linear-gradient(90deg, #ff007f, #7f00ff) !important;
+        color: white !important;
+        border: none !important;
+        box-shadow: 0 4px 15px rgba(255, 0, 127, 0.4);
+        transition: all 0.3s ease 0s;
+    }
+    div.stButton > button:hover {
+        box-shadow: 0 4px 25px rgba(255, 0, 127, 0.7);
+        transform: translateY(-2px);
     }
     """
 
@@ -55,19 +85,6 @@ st.markdown(f"""
     0% {{ background-position: 0% 50%; }}
     50% {{ background-position: 100% 50%; }}
     100% {{ background-position: 0% 50%; }}
-}}
-
-/* Glowing Buttons */
-div.stButton > button {{
-    background: linear-gradient(90deg, #ff007f, #7f00ff) !important;
-    color: white !important;
-    border: none !important;
-    box-shadow: 0 4px 15px rgba(255, 0, 127, 0.4);
-    transition: all 0.3s ease 0s;
-}}
-div.stButton > button:hover {{
-    box-shadow: 0 4px 25px rgba(255, 0, 127, 0.7);
-    transform: translateY(-2px);
 }}
 </style>
 """, unsafe_allow_html=True)
