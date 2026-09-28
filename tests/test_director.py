@@ -11,7 +11,7 @@ import os
 import pytest
 from unittest.mock import patch, MagicMock
 
-from agents.director_agent import DirectorAgent, _ken_burns_clip, _resolve_font
+from agents.director_agent import DirectorAgent, _resolve_font
 from core.exceptions import DirectorError
 from models import Scene
 
