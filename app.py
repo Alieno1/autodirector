@@ -54,6 +54,18 @@ if light_mode:
     div[data-baseweb="select"] div {
         color: #1a1a1a !important;
     }
+    /* Fix Sidebar Collapse Arrow and Top Right Menu (Deploy / Options) */
+    [data-testid="collapsedControl"] svg, [data-testid="stSidebarCollapseButton"] svg, [data-testid="stToolbar"] svg, button[kind="headerNoPadding"] svg {
+        fill: #666666 !important;
+        color: #666666 !important;
+    }
+    [data-testid="stToolbar"] span, [data-testid="stToolbar"] button {
+        color: #666666 !important;
+    }
+    /* Fix Toggle Switch Color for Light Mode */
+    div[data-testid="stToggleButton"] div[data-baseweb="checkbox"] > div {
+        background-color: #29b6f6 !important;
+    }
     /* Glowing Buttons Light Mode (Bright Cyan/Blue) */
     div.stButton > button {
         background: linear-gradient(90deg, #4fc3f7, #29b6f6) !important;
