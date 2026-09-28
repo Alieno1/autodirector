@@ -17,6 +17,44 @@
 
 ---
 
+## 🔑 How to Setup Your API Keys
+
+To use Auto-Director at its full potential, you must configure two specific API Keys. You do **not** need a GPU on your computer—these cloud platforms do 100% of the heavy lifting.
+
+1. **OpenRouter (The Brain):** Provides the LLM logic to write your scenes and analyze your story. 
+   * Get it here: [openrouter.ai](https://openrouter.ai/)
+2. **Replicate (The Video Camera):** Provides access to massive cloud supercomputers running the *MiniMax* Video AI to generate your animated video clips. 
+   * Get it here: [replicate.com/account/api-tokens](https://replicate.com/account/api-tokens)
+   * *(Note: Replicate is a paid service costing roughly $0.02 per clip. You MUST add a payment method to your Replicate account, or the app will hit a 'Free Limit' error and fall back to static images).*
+
+### Adding the Keys to the Software:
+Create a `.env` file in the root folder of this project and paste your keys:
+```env
+OPENROUTER_API_KEY="sk-or-v1-your-key-here..."
+REPLICATE_API_TOKEN="r8_your_token_here..."
+```
+Because this file is in `.gitignore`, **your keys will never be uploaded to GitHub.** Alternatively, you can copy/paste your keys directly into the Streamlit Web UI sidebar!
+
+---
+
+## 💻 How to Use the UI (User Manual)
+
+Forget using the terminal! To start the application, simply run:
+```bash
+./.venv/bin/streamlit run app.py
+```
+This will pop open a browser window at `http://localhost:8501`. 
+
+### The Workflow:
+1. **Enter your Story:** Paste your raw text into the main text box. It can be misspelled, sloppy, in Hindi, or Hinglish—the OpenRouter AI will magically parse and translate it seamlessly!
+2. **Press "Generate Video"**: 
+   * **If your story is short and perfect (< 130 words):** The pipeline will instantly fire up, skipping all questions, and begin rendering your movie immediately!
+   * **If your story is too long (> 130 words):** The UI will intelligently pause. It will display a *"Your story is quite long!"* warning, and OpenRouter will automatically generate two alternate, compressed storylines designed specifically to fit underneath 90 seconds. You can choose one of the recommended storylines, or force the AI to try and squeeze your original long story in anyway, then hit **"Confirm Choice"**.
+3. **The Progress Log:** Sit back and scroll down to the bottom log interface. You will see real-time color-coded terminal logs as the 5 agents generate audio, process the Replicate cloud videos, align the subtitles, and stitch the MP4 container securely.
+4. **Download your Movie!** Once Agent 5 completes at 100%, the completed movie will pop up explicitly in the browser player for you to watch, share, and download directly. 
+
+---
+
 ## 🏗️ System Architecture
 
 ```
@@ -61,84 +99,3 @@
                        │ Micro-Drama (.mp4)      │
                        └─────────────────────────┘
 ```
-
----
-
-## 🚀 Quick Start Guide
-
-### 1. System Requirements
-
-Install Linux system dependencies (`ffmpeg` for encoding and `espeak-ng` for offline TTS):
-
-```bash
-sudo apt-get update
-sudo apt-get install -y ffmpeg espeak-ng
-```
-
-### 2. Environment Setup
-
-Clone the repository and set up a virtual environment:
-
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-```
-
-### 3. API Key Configuration
-
-Copy the example environment file or manually create a `.env` in the root folder with the following:
-
-```env
-OPENROUTER_API_KEY="sk-or-your-key..."
-REPLICATE_API_TOKEN="r8_your_token..."
-
-# Optional:
-ELEVENLABS_API_KEY="sk_your_key_here..."
-```
-
----
-
-## 💻 Running the Application
-
-Forget the CLI—everything is gracefully handled via the **Streamlit Web UI**.
-
-```bash
-./.venv/bin/streamlit run app.py
-```
-This boots up a local web server at `localhost:8501`. 
-1. The UI will securely auto-load your `.env` keys.
-2. Enter a story in English, Hindi, or Hinglish.
-3. Click "Generate Video", let the 5-Agent pipeline run, and view the final MP4 embedded directly the browser!
-
----
-
-## 📂 Project Structure
-
-```
-autodirector/
-├── app.py                    # The Main Streamlit UI 
-├── config.py                 # Pipeline configuration & API key management
-├── models.py                 # Pydantic data models (Scene, Caption, etc.)
-├── agents/
-│   ├── scriptwriter_agent.py # OpenRouter Story parsing & scene breakdown
-│   ├── voice_agent.py        # Voice synthesis (ElevenLabs / gTTS / espeak)
-│   ├── visual_agent.py       # Cinematic Video Generation (Replicate / Fallbacks)
-│   ├── subtitle_agent.py     # Subtitle word timing alignment
-│   └── director_agent.py     # MoviePy 2.x video assembly & styling
-├── .streamlit/
-│   └── config.toml           # Vibrant Animated cyberpunk Streamlit styling
-├── core/
-│   ├── logger.py             # UI + Terminal logging handlers
-│   ├── retry.py              # Exponential backoff & HTTP status filter
-│   └── exceptions.py         # Custom pipeline exceptions
-├── assets/                   # TrueType fonts (DejaVuSans-Bold, NotoSansDevanagari)
-├── output/                   # Final rendered MP4 output directory
-└── temp/                     # Internal sandbox for holding AI clips
-```
-
-## 🛡️ Architecture Design Decisions
-
-1. **MoviePy 2.x Refactor:** Handled the major API breaks in MoviePy 2.2 (`moviepy.video.fx.all` deprecated to `.with_effects([vfx.Loop()])`) for stable video integration.
-2. **Dynamic UI Streaming:** Bypassed standard un-copyable UI text blocks and used `st.code()` with custom python-logging wrappers so users can comfortably monitor and copy pipeline errors as it runs.
-3. **Provider-Agnostic Resilience:** If Replicate limits are exhausted, the app silently routes to fetch AI Images from Pollinations. The Director Agent naturally detects MP4 versus PNG to apply Pan-and-Zoom effects appropriately without crashing.
