@@ -19,38 +19,56 @@ from agents.director_agent import DirectorAgent
 
 st.set_page_config(page_title="Auto-Director AI", page_icon="🎬", layout="wide")
 
+# --- Light Mode Toggle ---
+light_mode = st.sidebar.toggle("☀️ Light Mode")
+
 # Inject vibrant animated CSS
-st.markdown("""
+if light_mode:
+    bg_style = """
+    .stApp {
+        background: linear-gradient(-45deg, #f0f4f8, #e8f0fe, #d2e3fc, #f0f4f8);
+        background-size: 400% 400%;
+        animation: gradientBG 15s ease infinite;
+    }
+    h1, h2, h3, h4, p, label {
+        color: #1a1a1a !important;
+        text-shadow: none !important;
+    }
+    """
+else:
+    bg_style = """
+    .stApp {
+        background: linear-gradient(-45deg, #120a1f, #1c1130, #2c0b38, #0e0524);
+        background-size: 400% 400%;
+        animation: gradientBG 15s ease infinite;
+    }
+    h1, h2, h3 {
+        text-shadow: 0 2px 10px rgba(255, 0, 127, 0.3);
+    }
+    """
+
+st.markdown(f"""
 <style>
 /* Animated Gradient Background for the main container */
-.stApp {
-    background: linear-gradient(-45deg, #120a1f, #1c1130, #2c0b38, #0e0524);
-    background-size: 400% 400%;
-    animation: gradientBG 15s ease infinite;
-}
-@keyframes gradientBG {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-}
+{bg_style}
+@keyframes gradientBG {{
+    0% {{ background-position: 0% 50%; }}
+    50% {{ background-position: 100% 50%; }}
+    100% {{ background-position: 0% 50%; }}
+}}
 
 /* Glowing Buttons */
-div.stButton > button {
+div.stButton > button {{
     background: linear-gradient(90deg, #ff007f, #7f00ff) !important;
     color: white !important;
     border: none !important;
     box-shadow: 0 4px 15px rgba(255, 0, 127, 0.4);
     transition: all 0.3s ease 0s;
-}
-div.stButton > button:hover {
+}}
+div.stButton > button:hover {{
     box-shadow: 0 4px 25px rgba(255, 0, 127, 0.7);
     transform: translateY(-2px);
-}
-
-/* Enhance Headers */
-h1, h2, h3 {
-    text-shadow: 0 2px 10px rgba(255, 0, 127, 0.3);
-}
+}}
 </style>
 """, unsafe_allow_html=True)
 
@@ -113,6 +131,16 @@ if "final_story_to_process" not in st.session_state:
 
 
 # --- Main App ---
+st.markdown("### 🎛️ Render Settings")
+quality = st.selectbox("Video Quality (Prevent Cloud RAM Crashes)", ["High (1080p - 30FPS)", "Medium (720p - 24FPS)", "Low (480p - 24FPS)"], index=1)
+if quality.startswith("High"):
+    settings.VIDEO_WIDTH, settings.VIDEO_HEIGHT, settings.FPS = 1080, 1920, 30
+elif quality.startswith("Medium"):
+    settings.VIDEO_WIDTH, settings.VIDEO_HEIGHT, settings.FPS = 720, 1280, 24
+else:
+    settings.VIDEO_WIDTH, settings.VIDEO_HEIGHT, settings.FPS = 480, 854, 24
+
+st.markdown("---")
 story_input = st.text_area("📖 Enter your Story or Script", height=150, placeholder="Write a short dramatic story here...")
 
 word_count = len(story_input.split())
