@@ -254,13 +254,16 @@ class DirectorAgent:
             out_path = os.path.join(settings.OUTPUT_DIR, output_filename)
 
             log.info("Rendering video to: %s", out_path)
+            import gc
+            gc.collect()
+
             final.write_videofile(
                 out_path,
                 fps=settings.FPS,
                 codec="libx264",
                 audio_codec="aac",
-                preset="medium",
-                threads=4,
+                preset="ultrafast",
+                threads=1,
                 logger=None,
                 ffmpeg_params=["-pix_fmt", "yuv420p"],
             )

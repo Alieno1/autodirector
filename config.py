@@ -57,9 +57,9 @@ class Settings(BaseSettings):
     # These are computed in the validator below; do NOT set them in .env.
 
     # ── Video output settings ─────────────────────────────────────────────────
-    VIDEO_WIDTH: int = Field(default=1080, ge=360, le=3840, description="Output frame width in pixels")
-    VIDEO_HEIGHT: int = Field(default=1920, ge=640, le=7680, description="Output frame height in pixels")
-    FPS: int = Field(default=30, ge=1, le=60, description="Output video frame rate")
+    VIDEO_WIDTH: int = Field(default=720, ge=360, le=3840, description="Output frame width in pixels")
+    VIDEO_HEIGHT: int = Field(default=1280, ge=640, le=7680, description="Output frame height in pixels")
+    FPS: int = Field(default=24, ge=1, le=60, description="Output video frame rate")
     MAX_VIDEO_DURATION: int = Field(default=90, ge=10, le=600, description="Maximum video playback length in seconds")
 
     # ── Subtitle mode ─────────────────────────────────────────────────────────
