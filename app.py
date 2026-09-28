@@ -61,9 +61,9 @@ st.markdown("Transform your stories into fully rendered 9:16 vertical videos usi
 with st.sidebar:
     st.header("⚙️ API Configuration")
     
-    openrouter_key = st.text_input("OpenRouter API Key (LLM)", value=settings.OPENROUTER_API_KEY, type="password")
-    replicate_key = st.text_input("Replicate API Key (Video/Audio)", value=getattr(settings, "REPLICATE_API_TOKEN", ""), type="password")
-    elevenlabs_key = st.text_input("ElevenLabs API Key (TTS) Optional", value=settings.ELEVENLABS_API_KEY, type="password")
+    openrouter_key = st.text_input("OpenRouter API Key (LLM)", value="", type="password", placeholder="Enter your own key to override...")
+    replicate_key = st.text_input("Replicate API Key (Video/Audio)", value="", type="password", placeholder="Enter your own key to override...")
+    elevenlabs_key = st.text_input("ElevenLabs API Key (TTS) Optional", value="", type="password", placeholder="Enter your own key to override...")
     
     st.markdown("---")
     st.info("Keys are updated dynamically.")
