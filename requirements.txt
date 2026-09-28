@@ -1,19 +1,12 @@
-# ── Core runtime dependencies ──────────────────────────────────────────────────
 moviepy>=2.1.0
 pillow>=10.0.0
 requests>=2.31.0
 numpy>=1.24.0
-
-# ── Production additions ────────────────────────────────────────────────────────
 pydantic>=2.0.0
-pydantic-settings>=2.0.0      # validated, typed config from env / .env file
-typer>=0.12.0                  # production CLI (--help, subcommands, types)
-rich>=13.7.0                   # progress bars, colored output, tables
-tenacity>=8.2.0                # retry / exponential-backoff decorator
-
-# ── Optional: Whisper forced-alignment subtitles ──────────────────────────────
-# Uncomment to enable real per-word timestamps (downloads ~150 MB model on first run)
-# openai-whisper>=20231117
+pydantic-settings>=2.0.0
+typer>=0.12.0
+rich>=13.7.0
+tenacity>=8.2.0
 streamlit
 replicate
 gtts
