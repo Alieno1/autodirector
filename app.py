@@ -48,15 +48,23 @@ if light_mode:
         opacity: 1 !important;
     }
     
-    /* Force ANY SVG inside any Button to Pitch Black (Catches sidebar arrow and options menu) */
-    button svg, [data-testid="collapsedControl"] svg, [data-testid="stHeader"] button svg, [data-testid="stSidebar"] button svg {
-        filter: brightness(0) !important;
+    /* Force ALL Header and Sidebar SVGs to Pitch Black */
+    header svg, [data-testid="stSidebar"] svg, [data-testid="collapsedControl"] svg, [data-testid="stToolbar"] svg {
+        filter: none !important;
         fill: #000000 !important;
+        stroke: #000000 !important;
         color: #000000 !important;
     }
     
-    /* Force Toggle Switch */
-    div[role="switch"] > div, .stCheckbox [role="switch"] > div {
+    /* Ensure the container doesn't block visibility */
+    [data-testid="collapsedControl"], header, [data-testid="stToolbar"] {
+        color: #000000 !important;
+        opacity: 1 !important;
+    }
+    
+    /* Fix Toggle Switch */
+    div[data-testid="stWidgetLabel"] + div[data-baseweb="checkbox"] > div,
+    div[role="switch"] > div, .stCheckbox [role="switch"] > div, .stCheckbox div[data-baseweb="checkbox"] > div {
         background-color: #000000 !important;
     }
     
