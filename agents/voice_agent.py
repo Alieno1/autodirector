@@ -185,4 +185,15 @@ class VoiceAgent:
                 f"{len(errors)} scene(s) failed audio synthesis:\n" + "\n".join(errors)
             )
 
-        return scenes
+        # Truncate scenes if they exceed the absolute MAX_VIDEO_DURATION
+        total_duration = 0.0
+        trimmed_scenes = []
+        for scene in scenes:
+            if total_duration + scene.duration > settings.MAX_VIDEO_DURATION:
+                log.warning("Scene %d pushes total duration (%.2fs) over %ds limit. Dropping remaining scenes.", 
+                            scene.id, total_duration + scene.duration, settings.MAX_VIDEO_DURATION)
+                break
+            total_duration += scene.duration
+            trimmed_scenes.append(scene)
+
+        return trimmed_scenes

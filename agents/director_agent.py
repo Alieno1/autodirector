@@ -131,24 +131,39 @@ def _render_caption_png(text: str, out_png_path: str, font_path: str) -> None:
     img.save(out_png_path)
 
 
-def _ken_burns_clip(image_path: str, duration: float):
+def _video_or_ken_burns_clip(media_path: str, duration: float):
     """
-    Load a still image, scale to cover the 9:16 canvas, and apply a slow
-    continuous zoom-in (Ken Burns effect) for the scene's full duration.
+    If the media is an MP4, load it as a VideoFileClip and trim/loop it to the exact audio duration.
+    If it's a still image (PNG/JPG), apply the Ken Burns zoom-in effect.
     """
-    from moviepy import ImageClip
+    from moviepy import ImageClip, VideoFileClip
+    import moviepy.video.fx as vfx
 
-    clip = ImageClip(image_path)
-    scale_w = settings.VIDEO_WIDTH / clip.w
-    scale_h = settings.VIDEO_HEIGHT / clip.h
-    base_scale = max(scale_w, scale_h) * 1.05  # slight overscan for zoom headroom
-    zoom_amount = 0.06                          # total zoom across the clip
+    if media_path.lower().endswith(".mp4"):
+        clip = VideoFileClip(media_path)
+        # We need to forcefully fit the video horizontally/vertically or just centre and crop
+        # but replicate minimax already outputs 16:9 or 9:16. Let's force resize and crop to 9:16.
+        clip = clip.resized(height=settings.VIDEO_HEIGHT)
+        # If the generated clip is shorter than audio, loop it. If longer, subclip it.
+        if clip.duration < duration:
+            clip = clip.with_effects([vfx.Loop(duration=duration)])
+        else:
+            clip = clip.subclip(0, duration)
+        return clip.with_position("center")
+        
+    else:
+        # Fallback to Ken Burns for legacy offline images
+        clip = ImageClip(media_path)
+        scale_w = settings.VIDEO_WIDTH / clip.w
+        scale_h = settings.VIDEO_HEIGHT / clip.h
+        base_scale = max(scale_w, scale_h) * 1.05
+        zoom_amount = 0.06
 
-    def scale_at(t: float) -> float:
-        progress = t / duration if duration > 0 else 0
-        return base_scale * (1 + zoom_amount * progress)
+        def scale_at(t: float) -> float:
+            progress = t / duration if duration > 0 else 0
+            return base_scale * (1 + zoom_amount * progress)
 
-    return clip.resized(scale_at).with_duration(duration).with_position("center")
+        return clip.resized(scale_at).with_duration(duration).with_position("center")
 
 
 def _caption_clip(caption: Caption, font_path: str, scene_id: int, caption_idx: int):
@@ -217,7 +232,7 @@ class DirectorAgent:
             for scene in scenes:
                 log.debug("Scene %d: compositing (duration=%.2fs)...", scene.id, scene.duration)
 
-                bg = _ken_burns_clip(scene.image_path, scene.duration)
+                bg = _video_or_ken_burns_clip(scene.image_path, scene.duration)
                 caption_clips = [
                     _caption_clip(c, font_path, scene.id, c_idx)
                     for c_idx, c in enumerate(scene.captions)

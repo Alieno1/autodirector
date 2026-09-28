@@ -14,3 +14,4 @@ tenacity>=8.2.0                # retry / exponential-backoff decorator
 # ── Optional: Whisper forced-alignment subtitles ──────────────────────────────
 # Uncomment to enable real per-word timestamps (downloads ~150 MB model on first run)
 # openai-whisper>=20231117
+streamlit\nreplicate\nrequests

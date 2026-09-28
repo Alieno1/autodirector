@@ -26,6 +26,7 @@ from core.exceptions import VisualError
 from core.logger import get_logger
 from core.retry import retry_api_call
 from models import Scene
+import replicate
 
 log = get_logger(__name__)
 
@@ -75,6 +76,30 @@ def _call_gemini_image(prompt: str, out_path: str) -> None:
 
     if not os.path.exists(out_path) or os.path.getsize(out_path) == 0:
         raise VisualError(f"Gemini image gen wrote an empty file at: {out_path}")
+
+def _call_replicate_video(prompt: str, out_path: str) -> None:
+    """Generate a video clip using Replicate (Minimax or Hailuo)"""
+    log.info(f"Generating video with Replicate: {prompt[:50]}...")
+    
+    # We use MiniMax video-01 via Replicate which creates high quality short clips
+    output = replicate.run(
+        "minimax/video-01",
+        input={
+            "prompt": prompt,
+            "prompt_optimizer": True
+        }
+    )
+    
+    # Wait and download the mp4
+    import requests
+    video_url = output
+    resp = requests.get(video_url, timeout=120)
+    resp.raise_for_status()
+    with open(out_path, "wb") as f:
+        f.write(resp.content)
+    
+    if not os.path.exists(out_path) or os.path.getsize(out_path) == 0:
+        raise VisualError(f"Replicate video gen wrote an empty file at: {out_path}")
 
 
 # ── Offline fallback: PIL gradient card ──────────────────────────────────────
@@ -177,9 +202,14 @@ def _call_stock_image(prompt: str, out_path: str) -> None:
 # ── Per-scene worker ──────────────────────────────────────────────────────────
 
 def _process_scene(scene: Scene) -> Scene:
-    """Generate an image for a single scene with caching and rate-limit fallbacks."""
-    out_path = os.path.join(settings.TEMP_DIR, f"scene_{scene.id}.png")
-    cache_path = _get_cache_path(scene.visual_prompt)
+    """Generate an image or video for a single scene with caching and rate-limit fallbacks."""
+    
+    # Check if we are doing video or image
+    is_video = settings.USE_LIVE_VIDEO_GEN
+    ext = ".mp4" if is_video else ".png"
+    
+    out_path = os.path.join(settings.TEMP_DIR, f"scene_{scene.id}{ext}")
+    cache_path = _get_cache_path(scene.visual_prompt + ext)
 
     # 1. Check local cache first to avoid duplicate API calls
     if os.path.exists(cache_path) and os.path.getsize(cache_path) > 0:
@@ -189,17 +219,30 @@ def _process_scene(scene: Scene) -> Scene:
         return scene
 
     try:
-        if settings.USE_LIVE_IMAGE_GEN:
+        if settings.USE_LIVE_VIDEO_GEN:
+            log.debug("Scene %d: calling Replicate video gen.", scene.id)
+            _call_replicate_video(scene.visual_prompt, out_path)
+            scene.image_path = out_path
+            return scene
+        
+        elif settings.USE_LIVE_IMAGE_GEN:
             log.debug("Scene %d: calling Gemini image gen.", scene.id)
             _call_gemini_image(scene.visual_prompt, out_path)
+            scene.image_path = out_path
+            return scene
         else:
-            raise VisualError("USE_LIVE_IMAGE_GEN is False")
+            raise VisualError("Live visual generation is disabled")
     except Exception as exc:
-        log.info(
-            "Scene %d: Gemini image gen unavailable (%s) — generating AI image via Pollinations Turbo.",
+        log.warning(
+            "Scene %d: Primary visual gen failed (%s) — falling back to AI image via Pollinations Turbo.",
             scene.id,
             exc,
         )
+        # CRITICAL FIX: Since we are falling back to static images, force the extension to .png
+        out_path = os.path.join(settings.TEMP_DIR, f"scene_{scene.id}.png")
+        # Update cache path to match new extension
+        cache_path = _get_cache_path(scene.visual_prompt + ".png")
+        
         try:
             _call_pollinations_image(scene.visual_prompt, out_path)
         except Exception as p_exc:

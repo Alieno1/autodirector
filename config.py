@@ -48,6 +48,8 @@ class Settings(BaseSettings):
 
     # ── API Keys ─────────────────────────────────────────────────────────────
     GEMINI_API_KEY: str = Field(default="", description="Google Gemini API key")
+    OPENROUTER_API_KEY: str = Field(default="", description="OpenRouter API key for LLM scripts")
+    REPLICATE_API_TOKEN: str = Field(default="", description="Replicate API key for text-to-video")
     ELEVENLABS_API_KEY: str = Field(default="", description="ElevenLabs TTS API key")
     GOOGLE_TTS_API_KEY: str = Field(default="", description="Google Cloud TTS API key")
 
@@ -58,6 +60,7 @@ class Settings(BaseSettings):
     VIDEO_WIDTH: int = Field(default=1080, ge=360, le=3840, description="Output frame width in pixels")
     VIDEO_HEIGHT: int = Field(default=1920, ge=640, le=7680, description="Output frame height in pixels")
     FPS: int = Field(default=30, ge=1, le=60, description="Output video frame rate")
+    MAX_VIDEO_DURATION: int = Field(default=90, ge=10, le=600, description="Maximum video playback length in seconds")
 
     # ── Subtitle mode ─────────────────────────────────────────────────────────
     USE_WHISPER: bool = Field(
@@ -110,8 +113,8 @@ class Settings(BaseSettings):
 
     @cached_property
     def USE_LIVE_LLM(self) -> bool:
-        """True when a Gemini key is present → use Gemini for scene breakdown."""
-        return bool(self.GEMINI_API_KEY)
+        """True when an OpenRouter or Gemini key is present → use LLM for scene breakdown."""
+        return bool(self.OPENROUTER_API_KEY or self.GEMINI_API_KEY)
 
     @cached_property
     def USE_LIVE_TTS(self) -> bool:
@@ -119,9 +122,9 @@ class Settings(BaseSettings):
         return bool(self.ELEVENLABS_API_KEY or self.GOOGLE_TTS_API_KEY)
 
     @cached_property
-    def USE_LIVE_IMAGE_GEN(self) -> bool:
-        """True when a Gemini key is present → use Gemini image generation."""
-        return bool(self.GEMINI_API_KEY)
+    def USE_LIVE_VIDEO_GEN(self) -> bool:
+        """True when a Replicate token is present → use Replicate for full video generation."""
+        return bool(self.REPLICATE_API_TOKEN)
 
     @cached_property
     def active_mode(self) -> str:

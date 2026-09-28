@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import json
 import re
+import requests
 
 from config import settings
 from core.exceptions import ScriptwriterError
@@ -43,6 +44,7 @@ Return ONLY valid JSON (no markdown fences, no preamble) in this exact shape:
   ]
 }
 Keep narration lines short (under 25 words) so they fit a fast-paced short video.
+IMPORTANT: The entire video MUST be strictly under 90 seconds long. Your total script (sum of all narrations) MUST NOT exceed 130 words. Keep it absolutely concise, or it will be chopped off.
 
 CRITICAL LANGUAGE REQUIREMENT:
 1. Match the language of the "narration" to the language of the input story (e.g., if the input is in Hindi, the narration must be in Hindi; if it is in Hinglish, the narration must be in Hinglish; if it is in English, the narration must be in English).
@@ -58,10 +60,44 @@ _REQUIRED_KEYS = {"narration", "visual_prompt", "mood"}
     max_attempts=settings.API_MAX_RETRIES,
     base_delay=settings.API_BASE_DELAY,
 )
-def _call_gemini(story_text: str) -> dict:
-    """Real call to the Gemini API. Retried automatically on transient errors."""
-    import requests  # imported lazily — not needed in DEMO mode
+def _call_openrouter(story_text: str) -> dict:
+    """Real call to the OpenRouter API. Retried automatically on transient errors."""
+    url = "https://openrouter.ai/api/v1/chat/completions"
+    headers = {
+        "Authorization": f"Bearer {settings.OPENROUTER_API_KEY}",
+        "HTTP-Referer": "https://localhost:8501", # Required by OpenRouter
+        "X-Title": "Auto-Director", # Required by OpenRouter
+    }
+    payload = {
+        "model": "meta-llama/llama-3.1-8b-instruct",
+        "messages": [
+            {"role": "system", "content": _SYSTEM_PROMPT},
+            {"role": "user", "content": story_text}
+        ],
+        "temperature": 0.7,
+        "response_format": {"type": "json_object"}
+    }
+    resp = requests.post(url, headers=headers, json=payload, timeout=60)
+    resp.raise_for_status()
+    data = resp.json()
+    raw_text = data["choices"][0]["message"]["content"]
+    try:
+        return json.loads(raw_text)
+    except json.JSONDecodeError:
+        # Fallback to manual extraction if the model wraps output in markdown code blocks
+        import re
+        json_match = re.search(r"```json\s*(.*?)\s*```", raw_text, flags=re.DOTALL)
+        if json_match:
+            return json.loads(json_match.group(1))
+        raise ScriptwriterError(f"OpenRouter did not return valid JSON: {raw_text}")
 
+
+@retry_api_call(
+    max_attempts=settings.API_MAX_RETRIES,
+    base_delay=settings.API_BASE_DELAY,
+)
+def _call_gemini(story_text: str) -> dict:
+    import requests
     url = (
         "https://generativelanguage.googleapis.com/v1beta/models/"
         f"gemini-flash-latest:generateContent?key={settings.GEMINI_API_KEY}"
@@ -75,6 +111,8 @@ def _call_gemini(story_text: str) -> dict:
     data = resp.json()
     raw_text = data["candidates"][0]["content"]["parts"][0]["text"]
     return json.loads(raw_text)
+
+
 
 
 def _validate_scenes_payload(data: dict) -> list[dict]:
@@ -148,19 +186,24 @@ class ScriptwriterAgent:
 
         if settings.USE_LIVE_LLM:
             try:
-                log.info("Calling Gemini for scene breakdown...")
-                data = _call_gemini(story_text)
+                if settings.OPENROUTER_API_KEY:
+                    log.info("Calling OpenRouter for scene breakdown...")
+                    data = _call_openrouter(story_text)
+                else:
+                    log.info("Calling Gemini for scene breakdown...")
+                    data = _call_gemini(story_text)
+                
                 raw_scenes = _validate_scenes_payload(data)
-                log.info("Gemini returned %d scenes.", len(raw_scenes))
+                log.info("LLM returned %d scenes.", len(raw_scenes))
             except Exception as exc:
                 log.warning(
-                    "Gemini call failed (%s: %s) — falling back to offline splitter.",
+                    "LLM call failed (%s: %s) — falling back to offline splitter.",
                     type(exc).__name__,
                     exc,
                 )
                 raw_scenes = _offline_split(story_text)
         else:
-            log.info("No GEMINI_API_KEY — using offline rule-based splitter.")
+            log.info("No LLM key — using offline rule-based splitter.")
             raw_scenes = _offline_split(story_text)
 
         if not raw_scenes:
