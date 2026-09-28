@@ -89,8 +89,13 @@ def _offline_tts(text: str, out_path: str) -> None:
         _gtts_fallback(text, out_path)
     except Exception as exc:
         log.warning("gTTS failed (%s) — falling back to espeak-ng.", exc)
+        import shutil
+        espeak_bin = "espeak-ng" if shutil.which("espeak-ng") else "espeak"
+        if not shutil.which(espeak_bin):
+            raise VoiceError(f"Both gTTS and local espeak binaries failed! Install espeak-ng via apt-get. (gTTS error: {exc})")
+        
         subprocess.run(
-            ["espeak-ng", "-s", "165", "-w", out_path, text],
+            [espeak_bin, "-s", "165", "-w", out_path, text],
             check=True,
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
